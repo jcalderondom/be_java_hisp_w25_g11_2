@@ -13,15 +13,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class SellerPostDTO {
     @JsonProperty("user_id")
-    private int userId;
+    private Integer userId;
     @JsonProperty("post_id")
-    private int postId;
+    private Integer postId;
     @JsonProperty("date")
     private String date;
     @JsonProperty("product")
     private ProductDTO product;
     @JsonProperty("category")
-    private int category;
+    private Integer category;
     @JsonProperty("price")
-    private double price;
+    private Double price;
 }

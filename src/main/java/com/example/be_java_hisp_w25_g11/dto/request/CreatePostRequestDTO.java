@@ -12,13 +12,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CreatePostRequestDTO {
     @JsonProperty("user_id")
-    private int userId;
+    private Integer userId;
     @JsonProperty("date")
     private String date;
     @JsonProperty("product")
     private ProductDTO product;
     @JsonProperty("category")
-    private int category;
+    private Integer category;
     @JsonProperty("price")
-    private double price;
+    private Double price;
 }
