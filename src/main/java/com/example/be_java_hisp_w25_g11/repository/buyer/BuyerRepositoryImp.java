@@ -56,4 +56,17 @@ public class BuyerRepositoryImp implements IBuyerRepository {
     public boolean existing(Integer id) {
         return buyers.containsKey(id);
     }
+
+    @Override
+    public Boolean addFollowed(Buyer user, Integer userId) {
+        user.getFollowed().add(userId);
+        return update(user.getId(),user);
+
+    }
+
+    @Override
+    public Boolean removeFollowed(Buyer user, Integer userIdToRemove) {
+        user.getFollowed().remove(userIdToRemove);
+        return update(user.getId(),user);
+    }
 }
