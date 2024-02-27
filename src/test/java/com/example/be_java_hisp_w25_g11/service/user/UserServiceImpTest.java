@@ -1,11 +1,11 @@
 package com.example.be_java_hisp_w25_g11.service.user;
 
 import com.example.be_java_hisp_w25_g11.dto.UserDTO;
-import com.example.be_java_hisp_w25_g11.dto.response.FollowedDTO;
 import com.example.be_java_hisp_w25_g11.dto.response.FollowerDTO;
 import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
+import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
 import com.example.be_java_hisp_w25_g11.repository.buyer.BuyerRepositoryImp;
 import com.example.be_java_hisp_w25_g11.repository.seller.SellerRepositoryImp;
 import org.junit.jupiter.api.Assertions;
@@ -15,13 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImpTest {
@@ -39,20 +37,13 @@ class UserServiceImpTest {
     }
 
     @Test
-    void followersSellersCount() {
-    }
+    void followersSellersCount() {}
 
     @Test
-    void userFollowSellers() {
-    }
+    void userFollowSellers() {}
 
     @Test
-    void unfollow() {
-    }
-
-    @Test
-    void sortFollowers() {
-    }
+    void unfollow() {}
 
     // T-0003: Verificar que el tipo de ordenamiento alfabético exista para los seguidores
     // Resultado: Permite continuar con normalidad.
@@ -64,7 +55,6 @@ class UserServiceImpTest {
         String orderAsc = "name_asc";
         String orderDesc = "name_desc";
         String noOrder = null;
-        String otherOrder = "other";
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         // Act & Assert
@@ -89,10 +79,6 @@ class UserServiceImpTest {
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowers(sellerId, failOrderAsc));
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowers(sellerId, failOrderDesc));
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowers(sellerId, otherOrder));
-    }
-
-    @Test
-    void sortFollowed() {
     }
 
     // T-0003: Verificar que el tipo de ordenamiento alfabético exista para los seguidos
@@ -129,6 +115,98 @@ class UserServiceImpTest {
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowed(buyerId, failOrderAsc));
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowed(buyerId, failOrderDesc));
         Assertions.assertThrows(BadRequestException.class, () -> userService.sortFollowed(buyerId, otherOrder));
+    }
+
+    // T-0004: Verificar que el ordenamiento alfabético se realice correctamente.
+    // Resultado: Retorna el DTO con la lista ordenada alfabéticamente (ascendentemente).
+    @Test
+    void testSortFollowersOK() {
+        Integer sellerId = 1;
+        Integer fakeUserId1 = 5, fakeUserId2 = 6, fakeUserId3 = 7;
+        String order = "NAME_ASC";
+
+        Buyer fakeUser1 = new Buyer(fakeUserId1, "Benito");
+        Buyer fakeUser2 = new Buyer(fakeUserId2, "Armando");
+        Buyer fakeUser3 = new Buyer(fakeUserId3, "Carlos");
+        Seller seller = new Seller(
+                1,
+                "Vendedor #1",
+                new HashSet<>(List.of(fakeUserId1, fakeUserId2, fakeUserId3)),
+                new HashSet<>(),
+                new HashSet<>()
+        );
+
+        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
+        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
+        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
+
+        when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
+        when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
+        when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
+        when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
+
+        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
+        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
+        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
+
+        FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
+
+        assertEquals("Armando", followersInfo.getFollowers().get(0).getName());
+        assertEquals("Benito", followersInfo.getFollowers().get(1).getName());
+        assertEquals("Carlos", followersInfo.getFollowers().get(2).getName());
+    }
+
+    // T-0004: Verificar que el ordenamiento alfabético se realice correctamente.
+    // Resultado: Retorna el DTO con la lista ordenada alfabéticamente (descendentemente).
+    @Test
+    void testSortFollowedOK() {
+        Integer sellerId = 1;
+        Integer fakeUserId1 = 5, fakeUserId2 = 6, fakeUserId3 = 7;
+        String order = "NAME_DESC";
+
+        Buyer fakeUser1 = new Buyer(fakeUserId1, "Armando");
+        Buyer fakeUser2 = new Buyer(fakeUserId2, "Benito");
+        Buyer fakeUser3 = new Buyer(fakeUserId3, "Carlos");
+        Seller seller = new Seller(
+                1,
+                "Vendedor #1",
+                new HashSet<>(List.of(fakeUserId1, fakeUserId2, fakeUserId3)),
+                new HashSet<>(),
+                new HashSet<>()
+        );
+
+        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
+        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
+        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
+
+        when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
+        when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
+        when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
+        when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
+
+        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
+        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
+        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
+
+        FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
+
+        assertEquals("Carlos", followersInfo.getFollowers().get(0).getName());
+        assertEquals("Benito", followersInfo.getFollowers().get(1).getName());
+        assertEquals("Armando", followersInfo.getFollowers().get(2).getName());
+    }
+
+    // T-0004: Verificar que el ordenamiento alfabético se realice correctamente.
+    // Resultado: Retorna una excepción dado que le pasamos un ID inexistente.
+    @Test
+    void testSortFollowersThrowsNotFound() {
+        Integer sellerId = 1;
+        String order = "NAME_ASC";
+
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> userService.sortFollowers(sellerId, order));
     }
 
     @Test
