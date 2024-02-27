@@ -9,6 +9,7 @@ import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Product;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.entity.SellerPost;
+import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
 import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
 import com.example.be_java_hisp_w25_g11.repository.buyer.IBuyerRepository;
 import com.example.be_java_hisp_w25_g11.repository.seller.ISellerRepository;
@@ -84,8 +85,11 @@ public class SellerPostServiceImp implements ISellerPostService {
             );
         }
 
-        Comparator<SellerPost> comparator = order.equalsIgnoreCase("DATE_ASC") ?
-                Comparator.comparing(SellerPost::getDate) : Comparator.comparing(SellerPost::getDate).reversed();
+        Comparator<SellerPost> comparator = switch (order.toLowerCase()) {
+            case "date_asc" -> Comparator.comparing(SellerPost::getDate);
+            case "date_desc" -> Comparator.comparing(SellerPost::getDate).reversed();
+            default -> throw new BadRequestException("Argumento invalido (order debe ser DATE_ASC o DATE_DESC)");
+        };
 
         return new SellerPostsListDTO(
                 userId,
@@ -104,7 +108,7 @@ public class SellerPostServiceImp implements ISellerPostService {
                 .map(s -> {
                     Optional<Seller> followedSeller = sellerRepository.get(s);
                     if (followedSeller.isEmpty())
-                        throw new NotFoundException("No se pudo encontrar la información de un vendedor");
+                        throw new NotFoundException("No se pudo encontrar la información del vendedor");
 
                     return followedSeller
                             .get()
