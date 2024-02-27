@@ -11,4 +11,5 @@ public interface ICrudRepository <T, ID> {
     boolean update(ID id, T user);
     boolean delete(ID id);
     boolean existing(ID id);
+
 }

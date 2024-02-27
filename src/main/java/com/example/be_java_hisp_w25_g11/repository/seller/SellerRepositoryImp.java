@@ -47,7 +47,6 @@ public class SellerRepositoryImp implements ISellerRepository {
         if (get(id).isEmpty()) {
             return false;
         }
-
         sellers.put(id,seller);
         return true;
     }
@@ -60,5 +59,30 @@ public class SellerRepositoryImp implements ISellerRepository {
     @Override
     public boolean existing(Integer id) {
         return sellers.containsKey(id);
+    }
+
+    @Override
+    public Boolean addFollowed(Seller user, Integer userId) {
+        user.getFollowed().add(userId);
+        return update(user.getId(),user);
+
+    }
+
+    @Override
+    public Boolean addFollower(Seller user, Integer userId) {
+         user.getFollowers().add(userId);
+         return update(user.getId(),user);
+    }
+
+    @Override
+    public Boolean removeFollower(Seller user, Integer userIdToRemove) {
+        user.getFollowers().remove(userIdToRemove);
+        return update(user.getId(),user);
+    }
+
+    @Override
+    public Boolean removeFollowed(Seller user, Integer userIdToRemove) {
+        user.getFollowed().remove(userIdToRemove);
+        return update(user.getId(),user);
     }
 }
