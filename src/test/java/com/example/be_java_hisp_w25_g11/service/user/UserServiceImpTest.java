@@ -239,13 +239,12 @@ class UserServiceImpTest {
         Seller seller = new Seller(sellerId, "seller");
         String orderAsc = "name_asc";
         String orderDesc = "name_desc";
-        String noOrder = null;
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         // Act & Assert
         Assertions.assertDoesNotThrow(() -> userService.sortFollowers(sellerId, orderAsc));
         Assertions.assertDoesNotThrow(() -> userService.sortFollowers(sellerId, orderDesc));
-        Assertions.assertDoesNotThrow(() -> userService.sortFollowers(sellerId, noOrder));
+        Assertions.assertDoesNotThrow(() -> userService.sortFollowers(sellerId, null));
     }
 
     // T-0003: Verificar que el tipo de ordenamiento alfabético no exista para los seguidores
@@ -275,13 +274,12 @@ class UserServiceImpTest {
         Buyer buyer = new Buyer(buyerId, "buyer");
         String orderAsc = "name_asc";
         String orderDesc = "name_desc";
-        String noOrder = null;
         when(buyerRepository.get(buyerId)).thenReturn(Optional.of(buyer));
         when(sellerRepository.get(buyerId)).thenReturn(Optional.empty());
         // Act & Assert
         Assertions.assertDoesNotThrow(() -> userService.sortFollowed(buyerId, orderAsc));
         Assertions.assertDoesNotThrow(() -> userService.sortFollowed(buyerId, orderDesc));
-        Assertions.assertDoesNotThrow(() -> userService.sortFollowed(buyerId, noOrder));
+        Assertions.assertDoesNotThrow(() -> userService.sortFollowed(buyerId, null));
     }
 
     // T-0003: Verificar que el tipo de ordenamiento alfabético no exista para los seguidos
