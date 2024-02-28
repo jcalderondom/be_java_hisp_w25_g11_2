@@ -36,8 +36,65 @@ class UserServiceImpTest {
     private UserServiceImp userService;
 
     @Test
-    void follow() {
+    void BuyerfollowTestOk() {
+        //Arrange
+        Buyer buyer = new Buyer(5,"pepitoTest");
+        Seller seller = new Seller(6,"sellerTest");
+        Set<Integer> expectedfollowers = new HashSet<>(Set.of(5));
+        Set<Integer> expectedfollowed = new HashSet<>(Set.of(6));
+        when(buyerRepository.addFollowed(buyer,seller.getId())).thenReturn(true);
+        when(sellerRepository.addFollower(seller,buyer.getId())).thenReturn(true);
+        when(sellerRepository.get(seller.getId())).thenReturn(Optional.of(seller));
+        when(buyerRepository.get(buyer.getId())).thenReturn(Optional.of(buyer));
+        when(buyerRepository.existing(buyer.getId())).thenReturn(true);
+        when(sellerRepository.existing(seller.getId())).thenReturn(true);
+
+        //Act
+        SuccessDTO result = userService.follow(buyer.getId(),seller.getId());
+
+        //Assert
+        assertEquals("El usuario con id=5 ahora sigue al vendedor con id=6.",result.getMessage());
     }
+    @Test
+    void SellerfollowTestOk() {
+        //Arrange
+        Seller seller = new Seller(2,"pepitoTest");
+        Seller sellerToFollow = new Seller(6,"sellerTest");
+        Set<Integer> expectedfollowers = new HashSet<>(Set.of(5));
+        Set<Integer> expectedfollowed = new HashSet<>(Set.of(6));
+        when(sellerRepository.addFollowed(seller,sellerToFollow.getId())).thenReturn(true);
+        when(sellerRepository.addFollower(sellerToFollow,seller.getId())).thenReturn(true);
+        when(sellerRepository.get(seller.getId())).thenReturn(Optional.of(seller));
+        when(sellerRepository.get(sellerToFollow.getId())).thenReturn(Optional.of(sellerToFollow));
+        when(sellerRepository.existing(seller.getId())).thenReturn(true);
+        when(sellerRepository.existing(sellerToFollow.getId())).thenReturn(true);
+        //Act
+        SuccessDTO result = userService.follow(seller.getId(),sellerToFollow.getId());
+        //Assert
+        assertEquals("El usuario con id=2 ahora sigue al vendedor con id=6.",result.getMessage());
+    }
+    @Test
+    void followTestNotFound() {
+        //Arrange
+        Buyer buyer = new Buyer(5,"pepitoTest");
+        Seller seller = new Seller(6,"sellerTest");
+
+        //Act && Assert
+        assertThrows(NotFoundException.class,()-> userService.follow(buyer.getId(),seller.getId()));
+    }
+
+    @Test
+    void followTestBadRequest() {
+        //Arrange
+        Buyer buyer = new Buyer(5,"pepitoTest");
+        Seller seller = new Seller(6,"sellerTest");
+        when(buyerRepository.get(buyer.getId())).thenReturn(Optional.of(buyer));
+        when(buyerRepository.existing(buyer.getId())).thenReturn(true);
+        //Act && Assert
+        assertThrows(BadRequestException.class,()-> userService.follow(buyer.getId(), buyer.getId()));
+    }
+
+
 
     @Test
     void followersSellersCount() {}
