@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-
 @Service
 public class UserServiceImp implements IUserService {
     private final IBuyerRepository buyerRepository;
