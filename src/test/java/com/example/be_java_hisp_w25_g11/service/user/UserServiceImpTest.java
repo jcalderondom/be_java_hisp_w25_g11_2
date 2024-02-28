@@ -157,9 +157,6 @@ class UserServiceImpTest {
         assertThrows(exceptionExpected,() -> userService.followersSellersCount(sellerId));
     }
 
-    @Test
-    void userFollowSellers() {}
-
     //T-0002: Verificar que el usuario a dejar de seguir, exista (de seller a seller).
     // Resultado: Permite continuar con normalidad
     @Test
@@ -392,7 +389,4 @@ class UserServiceImpTest {
         assertThrows(NotFoundException.class, () -> userService.sortFollowers(sellerId, order));
     }
 
-    @Test
-    void isSeller() {
-    }
 }
