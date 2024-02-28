@@ -12,12 +12,12 @@ class BuyerRepositoryImpTest {
     private IBuyerRepository buyerRepository;
 
     @BeforeEach
-    void setupRepository() {
+    void setup() {
         buyerRepository = new BuyerRepositoryImp();
     }
 
     @Test
-    void getAll() {
+    void testGetAllOk() {
         // Arrange
         List<Buyer> buyers = List.of(
             new Buyer(1, "Buyer 1"),
@@ -33,7 +33,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void createAll() {
+    void testCreateAllOk() {
         // Arrange
         List<Buyer> buyers = List.of(
                 new Buyer(1, "Buyer 1"),
@@ -49,7 +49,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void create() {
+    void testCreateOk() {
         // Arrange
         Integer buyerId = 1;
         Buyer buyer = new Buyer(buyerId, "Buyer 1");
@@ -61,7 +61,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void get() {
+    void testGetOk() {
         // Arrange
         Integer buyerId = 1;
         Buyer buyer = new Buyer(buyerId, "Buyer 1");
@@ -73,7 +73,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void update() {
+    void testUpdateOk() {
         // Arrange
         Integer buyerId = 1;
         Buyer buyer = new Buyer(buyerId, "Buyer 1");
@@ -87,7 +87,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void delete() {
+    void testDeleteOk() {
         // Arrange
         Integer buyerId = 1;
         List<Buyer> buyers = List.of(
@@ -106,7 +106,7 @@ class BuyerRepositoryImpTest {
     }
 
     @Test
-    void existing() {
+    void testExistingOk() {
         // Arrange
         Integer buyerId = 1;
         Buyer buyer = new Buyer(buyerId, "Buyer 1");
