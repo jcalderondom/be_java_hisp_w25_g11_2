@@ -25,13 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceImpTest {
     private ISellerRepository sellerRepository;
     private IBuyerRepository buyerRepository;
+    private ModelMapper modelMapper;
     private IUserService userService ;
     @BeforeAll
     public void setupBeforeAll(){
         this.buyerRepository = mock(IBuyerRepository.class);
         this.sellerRepository = mock(ISellerRepository.class);
-        ModelMapper modelMapper = spy(new MapperUtil().modelMapper());
-        this.userService = new UserServiceImp(buyerRepository,sellerRepository, modelMapper);
+        this.modelMapper = spy(new MapperUtil().modelMapper());
+        this.userService = new UserServiceImp(buyerRepository,sellerRepository,modelMapper);
     }
     @BeforeEach
     public void setupReset(){
@@ -43,8 +44,6 @@ class UserServiceImpTest {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
         Seller seller = new Seller(6,"sellerTest");
-        Set<Integer> expectedfollowers = new HashSet<>(Set.of(5));
-        Set<Integer> expectedfollowed = new HashSet<>(Set.of(6));
         when(buyerRepository.addFollowed(buyer,seller.getId())).thenReturn(true);
         when(sellerRepository.addFollower(seller,buyer.getId())).thenReturn(true);
         when(sellerRepository.get(seller.getId())).thenReturn(Optional.of(seller));
@@ -63,8 +62,6 @@ class UserServiceImpTest {
         //Arrange
         Seller seller = new Seller(2,"pepitoTest");
         Seller sellerToFollow = new Seller(6,"sellerTest");
-        Set<Integer> expectedfollowers = new HashSet<>(Set.of(5));
-        Set<Integer> expectedfollowed = new HashSet<>(Set.of(6));
         when(sellerRepository.addFollowed(seller,sellerToFollow.getId())).thenReturn(true);
         when(sellerRepository.addFollower(sellerToFollow,seller.getId())).thenReturn(true);
         when(sellerRepository.get(seller.getId())).thenReturn(Optional.of(seller));
@@ -90,7 +87,6 @@ class UserServiceImpTest {
     void followTestBadRequest() {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
-        Seller seller = new Seller(6,"sellerTest");
         when(buyerRepository.get(buyer.getId())).thenReturn(Optional.of(buyer));
         when(buyerRepository.existing(buyer.getId())).thenReturn(true);
         //Act && Assert
@@ -203,7 +199,6 @@ class UserServiceImpTest {
     void unfollowTestBadRequest() {
         //Arrange
         Buyer buyer = new Buyer(5, "pepitoTest");
-        Seller seller = new Seller(6, "sellerTest");
 
         when(buyerRepository.get(buyer.getId())).thenReturn(Optional.of(buyer));
         when(buyerRepository.existing(buyer.getId())).thenReturn(true);
