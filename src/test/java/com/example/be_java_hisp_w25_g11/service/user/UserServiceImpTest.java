@@ -340,4 +340,7 @@ class UserServiceImpTest {
     @Test
     void isSeller() {
     }
+
+
 }
+

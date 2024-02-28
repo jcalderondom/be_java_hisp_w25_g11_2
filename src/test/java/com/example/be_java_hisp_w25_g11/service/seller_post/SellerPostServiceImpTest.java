@@ -11,6 +11,7 @@ import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
 import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
 import com.example.be_java_hisp_w25_g11.repository.buyer.BuyerRepositoryImp;
 import com.example.be_java_hisp_w25_g11.repository.seller.SellerRepositoryImp;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -142,9 +143,42 @@ class SellerPostServiceImpTest {
         return sellerPostService.getFollowedSellersLatestPosts(buyerId, order);
     }
 
+    //T-0005. Verificar que el tipo de ordenamiento por fecha exista(US-0009)
+    //Resultado: Permite continuar con normalidad.
     @Test
-    void createPost() {
+    void testFollowedSellersLatestPostsValidOrder(){
+        // Arrange
+        Integer sellerId = 1;
+        Seller seller = new Seller(sellerId, "seller");
+        String orderAsc = "date_asc";
+        String orderDesc = "date_desc";
+        String noOrder = null;
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
+        when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
+        // Act & Assert
+        Assertions.assertDoesNotThrow(() -> sellerPostService.getFollowedSellersLatestPosts(sellerId, orderAsc));
+        Assertions.assertDoesNotThrow(() -> sellerPostService.getFollowedSellersLatestPosts(sellerId, orderDesc));
+        Assertions.assertDoesNotThrow(() -> sellerPostService.getFollowedSellersLatestPosts(sellerId, noOrder));
     }
+
+    //T-0005. Verificar que el tipo de ordenamiento por fecha exista(US-0009)
+    //Resultado: Notifica la no existencia mediante una excepción.
+    @Test
+    void testFollowedSellersLatestPostsInvalidOrder() {
+        // Arrange
+        Integer sellerId = 1;
+        Seller seller = new Seller(sellerId, "seller");
+        String failOrderAsc = "asc";
+        String failOrderDesc = "desc";
+        String otherOrder = "empanada";
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
+        when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
+        // Act & Assert
+        Assertions.assertThrows(BadRequestException.class, () -> sellerPostService.getFollowedSellersLatestPosts(sellerId, failOrderAsc));
+        Assertions.assertThrows(BadRequestException.class, () -> sellerPostService.getFollowedSellersLatestPosts(sellerId, failOrderDesc));
+        Assertions.assertThrows(BadRequestException.class, () -> sellerPostService.getFollowedSellersLatestPosts(sellerId, otherOrder));
+    }
+
 
     // T-0006: Verificar el correcto ordenamiento ascendente y descendente por fecha
     // Resultado: Devuelve la lista ordenada según el criterio solicitado
