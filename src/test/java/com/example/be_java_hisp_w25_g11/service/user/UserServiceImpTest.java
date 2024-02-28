@@ -25,14 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceImpTest {
     private ISellerRepository sellerRepository;
     private IBuyerRepository buyerRepository;
-    private ModelMapper modelMapper;
     private IUserService userService ;
     @BeforeAll
     public void setupBeforeAll(){
         this.buyerRepository = mock(IBuyerRepository.class);
         this.sellerRepository = mock(ISellerRepository.class);
-        this.modelMapper = spy(new MapperUtil().modelMapper());
-        this.userService = new UserServiceImp(buyerRepository,sellerRepository,modelMapper);
+        ModelMapper modelMapper = spy(new MapperUtil().modelMapper());
+        this.userService = new UserServiceImp(buyerRepository,sellerRepository, modelMapper);
     }
     @BeforeEach
     public void setupReset(){
