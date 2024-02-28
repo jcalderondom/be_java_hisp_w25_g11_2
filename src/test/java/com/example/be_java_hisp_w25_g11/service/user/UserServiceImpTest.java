@@ -6,34 +6,41 @@ import com.example.be_java_hisp_w25_g11.dto.response.SuccessDTO;
 import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
+import com.example.be_java_hisp_w25_g11.repository.buyer.IBuyerRepository;
+import com.example.be_java_hisp_w25_g11.repository.seller.ISellerRepository;
+import com.example.be_java_hisp_w25_g11.utils.MapperUtil;
 import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
-import com.example.be_java_hisp_w25_g11.repository.buyer.BuyerRepositoryImp;
-import com.example.be_java_hisp_w25_g11.repository.seller.SellerRepositoryImp;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 class UserServiceImpTest {
-    @Mock
-    private SellerRepositoryImp sellerRepository;
-    @Mock
-    private BuyerRepositoryImp buyerRepository;
-    @Mock
+    private ISellerRepository sellerRepository;
+    private IBuyerRepository buyerRepository;
     private ModelMapper modelMapper;
-    @InjectMocks
-    private UserServiceImp userService;
+    private IUserService userService ;
+    @BeforeAll
+    public void setupBeforeAll(){
+        this.buyerRepository = mock(IBuyerRepository.class);
+        this.sellerRepository = mock(ISellerRepository.class);
+        this.modelMapper = spy(new MapperUtil().modelMapper());
+        this.userService = new UserServiceImp(buyerRepository,sellerRepository,modelMapper);
+    }
+
+    @BeforeEach
+    public void setupReset(){
+        reset(buyerRepository);
+        reset(sellerRepository);
+    }
 
     @Test
     void BuyerfollowTestOk() {
@@ -94,13 +101,69 @@ class UserServiceImpTest {
         assertThrows(BadRequestException.class,()-> userService.follow(buyer.getId(), buyer.getId()));
     }
 
-
-
+    /**
+     * test/T-0007/abadia_danis
+     * Verificar que la cantidad de seguidores de un determinado usuario sea correcta.
+     * Caso: cuando se ingresa un id de un seller correcto
+     */
     @Test
-    void followersSellersCount() {}
+    void testFollowersSellersCountOk() {
+        //arrange
+        Integer sellerId = 1;
+        Seller seller = new Seller(sellerId,"SellerTest");
+        seller.setFollowers(Set.of(5,4,3,2,8));
 
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
+
+        //act
+        Integer followersAmountExpected = seller.getFollowers().size();
+        Integer followersAmountResult = userService.followersSellersCount(sellerId).getFollowersCount();
+
+        //assert
+        assertEquals(followersAmountExpected,followersAmountResult,
+                () -> String.format("El Seller con id %d tiene: %d y se esperan %d seguidores",sellerId,followersAmountResult,followersAmountExpected));
+    }
+
+    /**
+     * test/T-0007/abadia_danis
+     * Verificar que la cantidad de seguidores de un determinado usuario sea correcta.
+     * Caso: cuando se ingresa Id de un seller incorrecto es decir de un buyer
+     */
     @Test
-    void userFollowSellers() {}
+    void testFollowersSellersCountFailWithAnNoSeller() {
+        //arrange
+        Integer buyerId = 1;
+        Buyer buyer = new Buyer(buyerId,"BuyerTest");
+
+        when(sellerRepository.get(buyerId)).thenReturn(Optional.empty());
+        when(buyerRepository.get(buyerId)).thenReturn(Optional.of(buyer));
+
+        //act
+        Class<BadRequestException> exceptionExpected = BadRequestException.class;
+
+        //assert
+        assertThrows(exceptionExpected,() -> userService.followersSellersCount(buyerId));
+    }
+
+    /**
+     * test/T-0007/abadia_danis
+     * Verificar que la cantidad de seguidores de un determinado usuario sea correcta.
+     * Caso: cuando se ingresa Id de un seller que no existe
+     */
+    @Test
+    void testFollowersSellersCountFailWithNotFoundSeller() {
+        //arrange
+        Integer sellerId = 1;
+
+        when(sellerRepository.get(sellerId)).thenReturn(Optional.empty());
+        when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
+
+        //act
+        Class<NotFoundException> exceptionExpected = NotFoundException.class;
+
+        //assert
+        assertThrows(exceptionExpected,() -> userService.followersSellersCount(sellerId));
+    }
 
     //T-0002: Verificar que el usuario a dejar de seguir, exista (de seller a seller).
     // Resultado: Permite continuar con normalidad
@@ -335,9 +398,5 @@ class UserServiceImpTest {
         when(sellerRepository.get(sellerId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.sortFollowers(sellerId, order));
-    }
-
-    @Test
-    void isSeller() {
     }
 }
