@@ -7,17 +7,16 @@ import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Product;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.entity.SellerPost;
+import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
 import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
 import com.example.be_java_hisp_w25_g11.repository.buyer.BuyerRepositoryImp;
 import com.example.be_java_hisp_w25_g11.repository.seller.SellerRepositoryImp;
-import com.example.be_java_hisp_w25_g11.service.user.UserServiceImp;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,8 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,15 +42,8 @@ class SellerPostServiceImpTest {
     @InjectMocks
     private SellerPostServiceImp sellerPostService;
 
-    @Test
-    void createPost() {
-    }
-
-    // T-0008: Verificar que la consulta de publicaciones realizadas en las últimas dos
-    // semanas de un determinado vendedor sean efectivamente de las últimas dos semanas.
-    // Resultado: Permite continuar con normalidad y devuelve la lista de posts de las últimas dos semanas.
-    @Test
-    void testFollowedSellersLatestPostsOK() {
+    private SellerPostsListDTO getFollowedSellersLatestPosts(String order) {
+        // Arrange
         Integer buyerId = 1;
         Integer sellerId1 = 2, sellerId2 = 3;
         Integer postId1 = 1, postId2 = 2, postId3 = 3, postId4 = 4;
@@ -58,7 +52,7 @@ class SellerPostServiceImpTest {
         SellerPost post1 = new SellerPost(
                 sellerId1,
                 postId1,
-                LocalDate.now().minusWeeks(1),
+                LocalDate.now().minusDays(3),
                 new Product(),
                 1,
                 10.0,
@@ -66,7 +60,7 @@ class SellerPostServiceImpTest {
         ), post2 = new SellerPost(
                 sellerId1,
                 postId2,
-                LocalDate.now().minusWeeks(1),
+                LocalDate.now().minusDays(7),
                 new Product(),
                 1,
                 10.0,
@@ -74,7 +68,7 @@ class SellerPostServiceImpTest {
         ), post3 = new SellerPost(
                 sellerId2,
                 postId3,
-                LocalDate.now().minusWeeks(1),
+                LocalDate.now().minusDays(10),
                 new Product(),
                 1,
                 10.0,
@@ -82,7 +76,7 @@ class SellerPostServiceImpTest {
         ), post4 = new SellerPost(
                 sellerId2,
                 postId4,
-                LocalDate.now().minusWeeks(1),
+                LocalDate.now().minusDays(12),
                 new Product(),
                 1,
                 10.0,
@@ -92,33 +86,32 @@ class SellerPostServiceImpTest {
         SellerPostDTO postDto1 = new SellerPostDTO(
                 sellerId1,
                 postId1,
-                "2024-02-25",
+                post1.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ProductDTO(),
                 1,
                 10.0
         ), postDto2 = new SellerPostDTO(
                 sellerId1,
                 postId1,
-                "2024-02-25",
+                post2.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ProductDTO(),
                 1,
                 10.0
         ), postDto3 = new SellerPostDTO(
                 sellerId2,
                 postId2,
-                "2024-02-25",
+                post3.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ProductDTO(),
                 1,
                 10.0
         ), postDto4 = new SellerPostDTO(
                 sellerId2,
                 postId2,
-                "2024-02-25",
+                post4.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                 new ProductDTO(),
                 1,
                 10.0
         );
-
 
         Buyer buyer = new Buyer(1, "Juan", followedSellers);
         Seller seller1 = new Seller(
@@ -140,14 +133,63 @@ class SellerPostServiceImpTest {
         when(sellerRepository.get(sellerId1)).thenReturn(Optional.of(seller1));
         when(sellerRepository.get(sellerId2)).thenReturn(Optional.of(seller2));
 
-        when(modelMapper.map(post1, SellerPostDTO.class)).thenReturn(postDto1);
-        when(modelMapper.map(post2, SellerPostDTO.class)).thenReturn(postDto2);
-        when(modelMapper.map(post3, SellerPostDTO.class)).thenReturn(postDto3);
-        when(modelMapper.map(post4, SellerPostDTO.class)).thenReturn(postDto4);
+        lenient().when(modelMapper.map(post1, SellerPostDTO.class)).thenReturn(postDto1);
+        lenient().when(modelMapper.map(post2, SellerPostDTO.class)).thenReturn(postDto2);
+        lenient().when(modelMapper.map(post3, SellerPostDTO.class)).thenReturn(postDto3);
+        lenient().when(modelMapper.map(post4, SellerPostDTO.class)).thenReturn(postDto4);
 
-        SellerPostsListDTO followedSellersPosts = sellerPostService
-                .getFollowedSellersLatestPosts(buyerId, null);
+        // Act
+        return sellerPostService.getFollowedSellersLatestPosts(buyerId, order);
+    }
 
+    @Test
+    void createPost() {
+    }
+
+    // T-0006: Verificar el correcto ordenamiento ascendente y descendente por fecha
+    // Resultado: Devuelve la lista ordenada según el criterio solicitado
+    @Test
+    void testFollowedSellersLatestPostsOrder() {
+        // Arrange
+        String orderAsc = "date_asc";
+        String orderDesc = "date_desc";
+        String orderInvalid = "date_invalid";
+        // Arrange & Act
+        List<SellerPostDTO> followedSellersPostsAsc = this.getFollowedSellersLatestPosts(orderAsc).getPosts();
+        List<SellerPostDTO> followedSellersPostsDesc = this.getFollowedSellersLatestPosts(orderDesc).getPosts();
+        // Assert
+        assertTrue(
+            IntStream.range(0, followedSellersPostsAsc.size() - 1)
+            .allMatch(
+                i -> followedSellersPostsAsc.get(i)
+                .getDate().compareTo(
+                    followedSellersPostsAsc.get(i + 1)
+                    .getDate()) <= 0
+            )
+        );
+        assertTrue(
+            IntStream.range(0, followedSellersPostsDesc.size() - 1)
+            .allMatch(
+                i -> followedSellersPostsDesc.get(i)
+                .getDate().compareTo(
+                    followedSellersPostsDesc.get(i + 1)
+                    .getDate()) >= 0
+            )
+        );
+        assertThrows(
+            BadRequestException.class,
+            () -> this.getFollowedSellersLatestPosts(orderInvalid)
+        );
+    }
+
+    // T-0008: Verificar que la consulta de publicaciones realizadas en las últimas dos
+    // semanas de un determinado vendedor sean efectivamente de las últimas dos semanas.
+    // Resultado: Permite continuar con normalidad y devuelve la lista de posts de las últimas dos semanas.
+    @Test
+    void testFollowedSellersLatestPostsOK() {
+        // Arrange & Act
+        SellerPostsListDTO followedSellersPosts = this.getFollowedSellersLatestPosts(null);
+        // Assert
         assertFalse(followedSellersPosts.getPosts()
                 .stream()
                 .anyMatch(v -> LocalDate.parse(
