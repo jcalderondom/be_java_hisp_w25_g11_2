@@ -36,7 +36,7 @@ class UserServiceImpTest {
     private UserServiceImp userService;
 
     @Test
-    void BuyerfollowTestOk() {
+    void testBuyerFollowOk() {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
         Seller seller = new Seller(6,"sellerTest");
@@ -56,7 +56,7 @@ class UserServiceImpTest {
         assertEquals("El usuario con id=5 ahora sigue al vendedor con id=6.",result.getMessage());
     }
     @Test
-    void SellerfollowTestOk() {
+    void testSellerFollowOk() {
         //Arrange
         Seller seller = new Seller(2,"pepitoTest");
         Seller sellerToFollow = new Seller(6,"sellerTest");
@@ -74,7 +74,7 @@ class UserServiceImpTest {
         assertEquals("El usuario con id=2 ahora sigue al vendedor con id=6.",result.getMessage());
     }
     @Test
-    void followTestNotFound() {
+    void testFollowNotFound() {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
         Seller seller = new Seller(6,"sellerTest");
@@ -84,7 +84,7 @@ class UserServiceImpTest {
     }
 
     @Test
-    void followTestBadRequest() {
+    void testFollowBadRequest() {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
         Seller seller = new Seller(6,"sellerTest");
@@ -128,7 +128,7 @@ class UserServiceImpTest {
     //T-0002: Notifica la no existencia con un excepción.
     // Resultado: Permite continuar con normalidad
     @Test
-    void unfollowTestNotFound() {
+    void testUnfollowNotFound() {
         //Arrange
         Buyer buyer = new Buyer(5,"pepitoTest");
         Seller seller = new Seller(6,"sellerTest");
@@ -138,7 +138,7 @@ class UserServiceImpTest {
     }
 
     @Test
-    void unfollowTestBadRequest() {
+    void testUnfollowBadRequest() {
         //Arrange
         Buyer buyer = new Buyer(5, "pepitoTest");
         Seller seller = new Seller(6, "sellerTest");
