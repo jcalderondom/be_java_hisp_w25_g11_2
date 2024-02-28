@@ -327,19 +327,11 @@ class UserServiceImpTest {
                 new HashSet<>()
         );
 
-        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
-        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
-        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
-
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
         when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
         when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
-
-        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
-        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
-        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
 
         FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
 
@@ -367,19 +359,11 @@ class UserServiceImpTest {
                 new HashSet<>()
         );
 
-        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
-        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
-        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
-
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
         when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
         when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
-
-        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
-        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
-        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
 
         FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
 
