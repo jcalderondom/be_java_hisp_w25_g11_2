@@ -1,23 +1,22 @@
 package com.example.be_java_hisp_w25_g11.service.user;
-
 import com.example.be_java_hisp_w25_g11.dto.UserDTO;
 import com.example.be_java_hisp_w25_g11.dto.response.FollowerDTO;
 import com.example.be_java_hisp_w25_g11.dto.response.SuccessDTO;
 import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
+import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
+import com.example.be_java_hisp_w25_g11.utils.MapperUtil;
 import com.example.be_java_hisp_w25_g11.repository.buyer.IBuyerRepository;
 import com.example.be_java_hisp_w25_g11.repository.seller.ISellerRepository;
-import com.example.be_java_hisp_w25_g11.utils.MapperUtil;
-import com.example.be_java_hisp_w25_g11.exception.NotFoundException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,13 +34,11 @@ class UserServiceImpTest {
         this.modelMapper = spy(new MapperUtil().modelMapper());
         this.userService = new UserServiceImp(buyerRepository,sellerRepository,modelMapper);
     }
-
     @BeforeEach
     public void setupReset(){
         reset(buyerRepository);
         reset(sellerRepository);
     }
-
     @Test
     void BuyerfollowTestOk() {
         //Arrange
@@ -164,6 +161,9 @@ class UserServiceImpTest {
         //assert
         assertThrows(exceptionExpected,() -> userService.followersSellersCount(sellerId));
     }
+
+    @Test
+    void userFollowSellers() {}
 
     //T-0002: Verificar que el usuario a dejar de seguir, exista (de seller a seller).
     // Resultado: Permite continuar con normalidad
@@ -327,11 +327,19 @@ class UserServiceImpTest {
                 new HashSet<>()
         );
 
+        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
+        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
+        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
+
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
         when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
         when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
+
+        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
+        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
+        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
 
         FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
 
@@ -359,11 +367,19 @@ class UserServiceImpTest {
                 new HashSet<>()
         );
 
+        UserDTO fakeUserDto1 = new UserDTO(fakeUser1.getId(), fakeUser1.getName());
+        UserDTO fakeUserDto2 = new UserDTO(fakeUser2.getId(), fakeUser2.getName());
+        UserDTO fakeUserDto3 = new UserDTO(fakeUser3.getId(), fakeUser3.getName());
+
         when(buyerRepository.get(sellerId)).thenReturn(Optional.empty());
         when(sellerRepository.get(sellerId)).thenReturn(Optional.of(seller));
         when(buyerRepository.get(fakeUserId1)).thenReturn(Optional.of(fakeUser1));
         when(buyerRepository.get(fakeUserId2)).thenReturn(Optional.of(fakeUser2));
         when(buyerRepository.get(fakeUserId3)).thenReturn(Optional.of(fakeUser3));
+
+        when(modelMapper.map(fakeUser1, UserDTO.class)).thenReturn(fakeUserDto1);
+        when(modelMapper.map(fakeUser2, UserDTO.class)).thenReturn(fakeUserDto2);
+        when(modelMapper.map(fakeUser3, UserDTO.class)).thenReturn(fakeUserDto3);
 
         FollowerDTO followersInfo = userService.sortFollowers(sellerId, order);
 
@@ -382,5 +398,9 @@ class UserServiceImpTest {
         when(sellerRepository.get(sellerId)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.sortFollowers(sellerId, order));
+    }
+
+    @Test
+    void isSeller() {
     }
 }
