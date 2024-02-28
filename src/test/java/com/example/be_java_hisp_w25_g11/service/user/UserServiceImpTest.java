@@ -388,5 +388,4 @@ class UserServiceImpTest {
 
         assertThrows(NotFoundException.class, () -> userService.sortFollowers(sellerId, order));
     }
-
 }
