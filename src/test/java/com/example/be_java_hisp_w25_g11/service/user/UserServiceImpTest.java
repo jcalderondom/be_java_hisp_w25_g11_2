@@ -2,6 +2,7 @@ package com.example.be_java_hisp_w25_g11.service.user;
 
 import com.example.be_java_hisp_w25_g11.dto.UserDTO;
 import com.example.be_java_hisp_w25_g11.dto.response.FollowerDTO;
+import com.example.be_java_hisp_w25_g11.dto.response.SuccessDTO;
 import com.example.be_java_hisp_w25_g11.entity.Buyer;
 import com.example.be_java_hisp_w25_g11.entity.Seller;
 import com.example.be_java_hisp_w25_g11.exception.BadRequestException;
@@ -18,6 +19,8 @@ import org.modelmapper.ModelMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,8 +45,76 @@ class UserServiceImpTest {
     @Test
     void userFollowSellers() {}
 
+    //T-0002: Verificar que el usuario a dejar de seguir, exista (de seller a seller).
+    // Resultado: Permite continuar con normalidad
     @Test
-    void unfollow() {}
+    void testSellerUnfollowTrue() {
+        //Arrange
+        Integer userId = 1;
+        Integer sellerIdToUnfollow = 6;
+        Seller fakeSeller = new Seller(userId, "Carolina", Set.of(2, 3), Set.of(sellerIdToUnfollow), Set.of());
+        Seller fakeSellerToUnfollow = new Seller(sellerIdToUnfollow, "Joaquín", Set.of(userId, 2, 4, 5),Set.of(4, 5),Set.of());
+
+        when(sellerRepository.get(userId)).thenReturn(Optional.of(fakeSeller));
+        when(sellerRepository.get(sellerIdToUnfollow)).thenReturn(Optional.of(fakeSellerToUnfollow));
+        when(sellerRepository.existing(userId)).thenReturn(true);
+        when(sellerRepository.existing(sellerIdToUnfollow)).thenReturn(true);
+
+        //Act
+        SuccessDTO result = userService.unfollow(userId, sellerIdToUnfollow);
+
+        //Assert
+
+        assertEquals(result.getMessage(), "El usuario con id=1 ha dejado de seguir al vendedor con id=6.");
+    }
+
+    //T-0002: Notifica la no existencia con un excepción.
+    // Resultado: Permite continuar con normalidad
+    @Test
+    void unfollowTestNotFound() {
+        //Arrange
+        Buyer buyer = new Buyer(5,"pepitoTest");
+        Seller seller = new Seller(6,"sellerTest");
+
+        //Act && Assert
+        assertThrows(NotFoundException.class,()-> userService.unfollow(buyer.getId(),seller.getId()));
+    }
+
+    @Test
+    void unfollowTestBadRequest() {
+        //Arrange
+        Buyer buyer = new Buyer(5, "pepitoTest");
+        Seller seller = new Seller(6, "sellerTest");
+
+        when(buyerRepository.get(buyer.getId())).thenReturn(Optional.of(buyer));
+        when(buyerRepository.existing(buyer.getId())).thenReturn(true);
+
+        //Act && Assert
+        assertThrows(BadRequestException.class, () -> userService.unfollow(buyer.getId(), buyer.getId()));
+    }
+
+    //T-0002: Verificar que el usuario a dejar de seguir, exista (de buyer a seller).
+    // Resultado: Permite continuar con normalidad
+    @Test
+    void testBuyerUnfollowTrue() {
+        //Arrange
+        Integer userId = 2;
+        Integer sellerIdToUnfollow = 5;
+        Buyer fakeBuyer = new Buyer(userId, "Martin", Set.of(sellerIdToUnfollow));
+        Seller fakeSellerToUnfollow = new Seller(sellerIdToUnfollow, "Joaquín", Set.of(userId, 4, 5),Set.of(4, 5),Set.of());
+
+        when(buyerRepository.get(userId)).thenReturn(Optional.of(fakeBuyer));
+        when(sellerRepository.get(sellerIdToUnfollow)).thenReturn(Optional.of(fakeSellerToUnfollow));
+        when(buyerRepository.existing(userId)).thenReturn(true);
+        when(sellerRepository.existing(sellerIdToUnfollow)).thenReturn(true);
+
+        //Act
+        SuccessDTO result = userService.unfollow(userId, sellerIdToUnfollow);
+
+        //Assert
+        assertEquals(result.getMessage(), "El usuario con id=2 ha dejado de seguir al vendedor con id=5.");
+
+    }
 
     // T-0003: Verificar que el tipo de ordenamiento alfabético exista para los seguidores
     // Resultado: Permite continuar con normalidad.
