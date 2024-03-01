@@ -10,7 +10,7 @@ import java.util.*;
 
 @Repository
 public class SellerPostRepositoryImp implements ISellerPostRepository {
-    private final Map<Integer,SellerPost> sellerPosts;
+    private  Map<Integer,SellerPost> sellerPosts;
     private Integer index = 0;
 
     public SellerPostRepositoryImp() {
@@ -63,5 +63,10 @@ public class SellerPostRepositoryImp implements ISellerPostRepository {
     @Override
     public boolean existing(Integer id) {
         return sellerPosts.containsKey(id);
+    }
+
+    @Override
+    public void clearData() {
+        sellerPosts = new HashMap<>();
     }
 }

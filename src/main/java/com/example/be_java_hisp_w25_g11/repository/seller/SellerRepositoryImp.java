@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public class SellerRepositoryImp implements ISellerRepository {
-    private final Map<Integer, Seller> sellers;
+    private  Map<Integer, Seller> sellers;
 
     public SellerRepositoryImp() {
         this.sellers = new HashMap<>();
@@ -59,6 +59,11 @@ public class SellerRepositoryImp implements ISellerRepository {
     @Override
     public boolean existing(Integer id) {
         return sellers.containsKey(id);
+    }
+
+    @Override
+    public void clearData() {
+        sellers = new HashMap<>();
     }
 
     @Override

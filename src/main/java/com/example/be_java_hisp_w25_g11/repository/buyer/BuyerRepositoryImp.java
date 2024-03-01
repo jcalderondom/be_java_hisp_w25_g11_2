@@ -7,7 +7,7 @@ import java.util.*;
 
 @Repository
 public class BuyerRepositoryImp implements IBuyerRepository {
-    private final Map<Integer, Buyer> buyers;
+    private Map<Integer, Buyer> buyers;
 
     public BuyerRepositoryImp() {
         this.buyers = new HashMap<>();
@@ -55,6 +55,11 @@ public class BuyerRepositoryImp implements IBuyerRepository {
     @Override
     public boolean existing(Integer id) {
         return buyers.containsKey(id);
+    }
+
+    @Override
+    public void clearData() {
+            buyers = new HashMap<>();
     }
 
     @Override
