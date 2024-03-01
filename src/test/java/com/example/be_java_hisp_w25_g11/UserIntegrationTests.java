@@ -84,5 +84,14 @@ public class UserIntegrationTests {
 
 
     }
+    @Test
+    public void followersCountTestOk() throws Exception{
+        dummySetup();
+        Integer userId = 3;
+        this.mockMvc.perform(get("/users/{userId}/followers/count", userId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.followers_count").value(1));
+    }
 
 }

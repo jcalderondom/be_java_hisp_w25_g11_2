@@ -66,7 +66,6 @@ public class SellerPostServiceImp implements ISellerPostService {
     @Override
     public SellerPostsListDTO getFollowedSellersLatestPosts(Integer userId, String order) {
         List<SellerPost> posts;
-
         Optional<Buyer> buyer = buyerRepository.get(userId);
         Optional<Seller> seller = sellerRepository.get(userId);
         if (buyer.isPresent())
